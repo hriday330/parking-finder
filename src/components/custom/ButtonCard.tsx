@@ -29,11 +29,11 @@ const ButtonCard: React.FC<ButtonCardProps> = ({
       <img
         src={imageSrc}
         alt={altText}
-        className="w-full h-full object-cover rounded-md opacity-40"
+        className="w-full h-full object-cover rounded-md opacity-50"
       />
       
       <div
-        className={`absolute flex flex-col items-end justify-center bg-opacity-90 text-black rounded-md p-2 ${overlayClass}`}
+        className={`absolute items-start justify-start bg-opacity-90 text-black rounded-md p-2 ${overlayClass}`}
       >
         <p className={`text-2xl font-bold ${labelClass}`}>{labelText}</p>
       </div>

@@ -2,12 +2,12 @@ import ButtonCard from "@/components/custom/ButtonCard"
 import { Button } from "@/components/ui/button";
 
 const locations: LocationEntry[] = [
-  { name: 'Downtown', link: '/', imageSrc: "/images/ubc.jpg" },
-  { name: 'SFU', link: '/' ,  imageSrc: "/images/ubc.jpg" },
+  { name: 'Downtown', link: '/', imageSrc: "/images/vancouver.jpg" },
+  { name: 'SFU', link: '/' ,  imageSrc: "/images/sfu.jpg" },
   { name: 'UBC', link: '/' ,  imageSrc: "/images/ubc.jpg" },
-  { name: 'Vancouver', link: '/', imageSrc: "/images/ubc.jpg" },
-  { name: 'Burnaby', link: '/' ,  imageSrc: "/images/ubc.jpg" },
-  { name: 'Coquitlam', link: '/' ,  imageSrc: "/images/ubc.jpg" },
+  { name: 'Richmond', link: '/', imageSrc: "/images/richmond.webp" },
+  { name: 'Burnaby', link: '/' ,  imageSrc: "/images/burnaby.jpg" },
+  { name: 'Coquitlam', link: '/' ,  imageSrc: "/images/coquitlam.jpg" },
 ];
 
 function Location() {
@@ -25,7 +25,7 @@ function Location() {
             {locations.map((location) => (
             <ButtonCard
                 key={location.name}
-                imageSrc="/images/ubc.jpg"
+                imageSrc={location.imageSrc}
                 labelText={location.name}
                 altText="image"
                 onClick={() => {}}
