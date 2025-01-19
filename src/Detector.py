@@ -1,69 +1,114 @@
 import cv2
-import numpy as np
 import time
+import requests
+import base64
+import os
+from io import BytesIO
+from PIL import Image
 
-class Detector:
-    def __init__(self, url, configPath, modelPath, classPath):
-        self.videoPath = url # path to video to analyze
-        self.configPath = configPath # path to configuration file
-        self.modelPath = modelPath # path to pre-trained model
-        self.classPath = classPath
+# Claude API configuration
+CLAUDE_API_URL = "https://api.anthropic.com/v1/messages"
+CLAUDE_API_KEY = "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"  # Replace with your actual API key
 
-        self.net = cv2.dnn_DetectionModel(self.modelPath, self.configPath)
-        self.net.setInputSize(320, 320)
-        self.net.setInputScale(1.0/127.5)
-        self.net.setInputMean((127.5, 127.5, 127.5))
-        self.net.setInputSwapRB(True)
+# IP Camera URL
+IP_CAMERA_URL = "http://128.189.228.47:8080/video"
 
-        self.readClasses()
-        print("hi")
+# Folder to save images
+SAVE_PATH = "captured_image.jpg"
 
-    def readClasses(self):
-        # Reads all the classes identifiable into list
-        with open(self.classPath, 'r') as f:
-            self.classList = f.read().splitlines()
+def capture_image_from_ip_camera():
+    """Captures a single frame from the IP camera and saves it locally."""
+    cap = cv2.VideoCapture(IP_CAMERA_URL, cv2.CAP_FFMPEG)
+    if not cap.isOpened():
+        raise RuntimeError("Cannot access the IP camera. Check the URL and connectivity.")
 
-        # Background, do not want classes in 0th index
-        self.classList.insert(0, '__Background__')
-        print(self.classList)
+    ret, frame = cap.read()
+    if ret:
+        cv2.imwrite(SAVE_PATH, frame)
+    else:
+        raise RuntimeError("Failed to capture image from the IP camera.")
 
-    def onVideo(self):
-        cap = cv2.VideoCapture(self.videoPath, cv2.CAP_FFMPEG)
-        cap.set(38,1)
-        #print(cv2.getBuildInformation())
-        (success, image) = cap.read()
+    cap.release()
 
-        while success:
-            classLabelIDs, confidences, bboxes = self.net.detect(image, confThreshold = 0.5)
-            bboxes = list(bboxes)
-            confidences = list(np.array(confidences).reshape(1, -1)[0])
-            confidences = list(map(float, confidences))
+def send_image_to_claude(image_path):
+    """Sends the captured image to Claude API for analysis."""
+    try:
+        with open(image_path, "rb") as image_file:
+            encoded_string = base64.b64encode(image_file.read()).decode("utf-8")
 
-            # non-maxima suppression of bounding box (removes overlapping bounding boxes)
-            bboxIndex = cv2.dnn.NMSBoxes(bboxes, confidences, score_threshold = 0.5, nms_threshold = 0.2)
+        headers = {
+            "x-api-key": CLAUDE_API_KEY,
+            "anthropic-version": "2023-06-01",
+            "content-type": "application/json"
+        }
 
-            if len(bboxIndex) != 0: # there are bounding boxes
-                for i in range(0, len(bboxIndex)):
-                    bbox = bboxes[np.squeeze(bboxIndex[i])]
-                    classConfidence = confidences[np.squeeze(bboxIndex[i])]
-                    classLabelID = np.squeeze(classLabelIDs[np.squeeze(bboxIndex[i])])
-                    classLabel = self.classList[classLabelID]
+        data = {
+            "model": "claude-3-opus-20240229",
+            "max_tokens": 1024,
+            "messages": [
+                {
+                    "role": "user",
+                    "content": [
+                        {
+                            "type": "text",
+                            "text": "How many yellow objects are in this image? Please respond with just a number."
+                        },
+                        {
+                            "type": "image",
+                            "source": {
+                                "type": "base64",
+                                "media_type": "image/jpeg",
+                                "data": encoded_string
+                            }
+                        }
+                    ]
+                }
+            ]
+        }
 
-                    displayText = "{}:{:.2f}".format(classLabel, classConfidence)
+        response = requests.post(CLAUDE_API_URL, headers=headers, json=data)
+        response.raise_for_status()
+        result = response.json()
 
-                    # Draw box
-                    x,y,w,h = bbox
-                    # displayText == "surfboard" or displayText == "skis" or displayText == "toothbrush"
-                    if (1 == 1):
-                        cv2.rectangle(image, (x,y), (x+w, y+h), color=(255, 255, 255), thickness=2)
-                        cv2.putText(image, displayText, (x, y-10), cv2.FONT_HERSHEY_TRIPLEX, 2, (255, 255, 255), 2)
+        if "content" in result and len(result["content"]) > 0:
+            try:
+                # Extract just the number from Claude's response
+                response_text = result["content"][0]["text"]
+                number = int(''.join(filter(str.isdigit, response_text)))
+                print("Claude Response (Number):", number)
+                return number
+            except (ValueError, IndexError) as e:
+                print(f"Could not parse a number from Claude's response: {response_text}")
+                return None
+        else:
+            print("Unexpected response format from Claude:", result)
+            return None
 
-            cv2.imshow("Result", cv2.resize(image, (1200, 600))) # Show
-            cv2.resizeWindow("Result", 1200, 600)
-            # Get keyboard event, if q, exit
-            key = cv2.waitKey(1) & 0xFF
-            if key == ord("q"):
-                break
+    except requests.exceptions.RequestException as e:
+        print(f"Request to Claude failed: {e}")
+        if 'response' in locals():
+            print(f"Response text: {response.text}")
+        return None
+    except Exception as e:
+        print(f"Error processing Claude response: {e}")
+        return None
 
-            (success, image) = cap.read()
-        cv2.destroyAllWindows()
+def main():
+    while True:
+        try:
+            capture_image_from_ip_camera()
+            print("Captured image.")
+
+            number_of_toys = send_image_to_claude(SAVE_PATH)
+
+            if number_of_toys is not None:
+                print(f"Number of toys with wheels: {number_of_toys}")
+
+            time.sleep(10)
+
+        except Exception as e:
+            print(f"Main loop error: {e}")
+            break
+
+if __name__ == "__main__":
+    main()
