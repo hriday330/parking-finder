@@ -2,17 +2,20 @@ import './App.css'
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom'
 import Home from '@/pages/Home'
 import Navbar from '@/components/custom/Navbar'
+import PlanTrip from './pages/PlanTrip'
 
 function App() {
   return (
-    <main className="w-screen h-screen flex flex-col">
+    <main className="w-screen bg-white h-screen">
       <Router>
-        <Navbar className="sticky">
+        <Navbar>
           <Link to="/">Home</Link>
-        </Navbar>
-        <div className="flex-grow overflow-auto">
+          <Link to="/plan-trip"> Plan your trip </Link>
+        </Navbar>              
+        <div className="flex my-10">
           <Routes>
             <Route path="/" element={<Home />} />
+            <Route path="/plan-trip" element={<PlanTrip/>}/>
           </Routes>
         </div>
       </Router>

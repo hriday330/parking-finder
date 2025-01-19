@@ -10,7 +10,7 @@ const Navbar: React.FC<NavbarProps> = ({ children, className }) => {
   return (
     <nav
       className={cn(
-        "fixed top-0 left-0 w-full bg-white shadow-md p-4 flex justify-between items-center z-50",
+        "fixed top-0 left-0 w-full bg-[#FCECAB] shadow-md p-4 flex justify-between items-center z-50",
         className
       )}
     >
