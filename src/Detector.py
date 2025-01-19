@@ -51,7 +51,7 @@ def send_image_to_claude(image_path):
                     "content": [
                         {
                             "type": "text",
-                            "text": "How many yellow objects are in this image? Please respond with just a number."
+                            "text": "How many red objects are in this image? Please respond with just a number."
                         },
                         {
                             "type": "image",
