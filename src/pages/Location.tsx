@@ -1,5 +1,5 @@
 import ButtonCard from "@/components/custom/ButtonCard"
-import { Button } from "@/components/ui/button";
+import Link from "@/components/custom/Link";
 
 const locations: LocationEntry[] = [
   { name: 'Downtown', link: '/', imageSrc: "/images/vancouver.jpg" },
@@ -12,11 +12,11 @@ const locations: LocationEntry[] = [
 
 function Location() {
   return (
-    <main>
-      <section className="flex flex-row">
+    <main className="w-screen justify-center">
+      <section className="flex flex-row justify-evenly space-y-5">
         <div className="flex flex-col">
         <img
-        className="w-64"
+        className="w-64 mt-20"
         src="/images/mascot.webp"/>
         </div>
       <div className="flex flex-col">
@@ -32,11 +32,10 @@ function Location() {
             />
             ))}
         </div>
-        <div>
-            <Button className="w-full my-2">
-                Are you looking outside of Vancouver? 
-            </Button>
-        </div>
+
+            <Link href="/plan-trip" variant="button" className="w-full text-white my-10">
+            Are you looking elsewhere?
+            </Link>
       </div>
     </section>
       

@@ -8,13 +8,12 @@ interface TimePickerProps {
 
 const TimePicker = ({ value, onChange, label = 'Select Time', labelClassName, inputClassName}: TimePickerProps) => {
   return (
-    <div className="flex flex-col space-y-2 bg-white border-2 rounded-lg items-center">
+    <div className="flex flex-col bg-white border-2 rounded-lg">
       <label htmlFor="time" className={`text-sm font-medium text-gray-700 ${labelClassName}`}>
         {label}
       </label>
-        <hr className="border-2 border-black"/>
         <input
-            className={`px-1 bg-white text-center font-semibold text-lg ${inputClassName}`}
+            className={`px-1 bg-white font-semibold text-lg ${inputClassName}`}
             type='time'
             onChange={onChange}
             value={value}
