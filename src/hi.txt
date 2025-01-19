@@ -1,0 +1,5 @@
+parking space
+location
+navigation
+current availability
+estimate availability
