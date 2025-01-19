@@ -49,9 +49,13 @@ class Detector:
                     classLabelID = np.squeeze(classLabelIDs[np.squeeze(bboxIndex[i])])
                     classLabel = self.classList[classLabelID]
 
+                    displayText = "{}:{:.2f}".format(classLabel, classConfidence)
+
                     # Draw box
                     x,y,w,h = bbox
-                    cv2.rectangle(image, (x,y), (x+w, y+h), color=(255, 255, 255), thickness=2)
+                    if (displayText == "surfboard" or displayText == "skis" or displayText == "toothbrush"):
+                        cv2.rectangle(image, (x,y), (x+w, y+h), color=(255, 255, 255), thickness=2)
+                        cv2.putText(image, displayText, (x, y-10), cv2.FONT_HERSHEY_TRIPLEX, 2, (255, 255, 255), 2)
 
             cv2.imshow("Result", cv2.resize(image, (1200, 600))) # Show
             cv2.resizeWindow("Result", 1200, 600)
