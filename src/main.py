@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from Detector import *
+from Detector import run_camera
 import os
 
 app = FastAPI()
@@ -17,17 +17,11 @@ app.add_middleware(
 )
 
 @app.get("/parking/{location}")
-async def funcy():
+async def get_parking_availability(location : str):
     # Get from website
     # Ask to connect to the right camera
-    url = "192.168.68.108:8080" # Replace this
-    Detector(url, configPath, modelPath, classPath)
-    return 2
-
-def main():
-    url = "http://128.189.228.47:8080"
-    detector = Detector("http://128.189.228.47:8080/video", configPath, modelPath, classPath)
-    detector.onVideo()
-
-if __name__ == '__main__':
-    main()
+    if (location == "ubc"):
+        url = "http://128.189.228.47:8080/video"
+    else:
+        url = "sfu"
+    return run_camera(url)

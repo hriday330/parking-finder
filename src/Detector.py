@@ -11,14 +11,14 @@ CLAUDE_API_URL = "https://api.anthropic.com/v1/messages"
 CLAUDE_API_KEY = "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"  # Replace with your actual API key
 
 # IP Camera URL
-IP_CAMERA_URL = "http://128.189.228.47:8080/video"
+#IP_CAMERA_URL = "http://128.189.228.47:8080/video"
 
 # Folder to save images
 SAVE_PATH = "captured_image.jpg"
 
-def capture_image_from_ip_camera():
+def capture_image_from_ip_camera(url):
     """Captures a single frame from the IP camera and saves it locally."""
-    cap = cv2.VideoCapture(IP_CAMERA_URL, cv2.CAP_FFMPEG)
+    cap = cv2.VideoCapture(url, cv2.CAP_FFMPEG)
     if not cap.isOpened():
         raise RuntimeError("Cannot access the IP camera. Check the URL and connectivity.")
 
@@ -93,22 +93,17 @@ def send_image_to_claude(image_path):
         print(f"Error processing Claude response: {e}")
         return None
 
-def main():
-    while True:
-        try:
-            capture_image_from_ip_camera()
-            print("Captured image.")
+def run_camera(url):
+    try:
+        capture_image_from_ip_camera(url)
+        print("Captured image.")
 
-            number_of_toys = send_image_to_claude(SAVE_PATH)
+        number_of_toys = send_image_to_claude(SAVE_PATH)
 
-            if number_of_toys is not None:
-                print(f"Number of toys with wheels: {number_of_toys}")
+        if number_of_toys is not None:
+            print(f"Number of toys with wheels: {number_of_toys}")
+            return min(10, max(9 - number_of_toys, 0))
+        return 0
 
-            time.sleep(10)
-
-        except Exception as e:
-            print(f"Main loop error: {e}")
-            break
-
-if __name__ == "__main__":
-    main()
+    except Exception as e:
+        print(f"Main loop error: {e}")
