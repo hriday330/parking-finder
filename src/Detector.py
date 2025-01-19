@@ -53,7 +53,8 @@ class Detector:
 
                     # Draw box
                     x,y,w,h = bbox
-                    if (displayText == "surfboard" or displayText == "skis" or displayText == "toothbrush"):
+                    # displayText == "surfboard" or displayText == "skis" or displayText == "toothbrush"
+                    if (1 == 1):
                         cv2.rectangle(image, (x,y), (x+w, y+h), color=(255, 255, 255), thickness=2)
                         cv2.putText(image, displayText, (x, y-10), cv2.FONT_HERSHEY_TRIPLEX, 2, (255, 255, 255), 2)
 
