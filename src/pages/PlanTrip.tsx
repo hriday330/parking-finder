@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useRef, useState } from "react";
 import mapboxgl from "mapbox-gl";
 import SearchBar from "@/components/custom/SearchBar";
@@ -18,6 +19,7 @@ const PlanTrip = () => {
   const [parkingLots, setParkingLots] = useState<any[]>([]);
   const [selectedParkingLot, setSelectedParkingLot] = useState<any | null>(null);
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
+  const suggestionsRef = useRef<HTMLDivElement | null>(null);
 
   const debounce = (func: (...args: any[]) => void, delay: number) => {
     let timer: NodeJS.Timeout;
@@ -180,6 +182,21 @@ const PlanTrip = () => {
   };
 
   useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        suggestionsRef.current &&
+        !suggestionsRef.current.contains(event.target as Node)
+      ) {
+        setSuggestions([]);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+
+  useEffect(() => {
     if (mapContainerRef.current) {
       const mapInstance = new mapboxgl.Map({
         container: mapContainerRef.current,
@@ -194,7 +211,7 @@ const PlanTrip = () => {
   }, []);
 
   return (
-    <div className="flex flex-col items-center space-y-5">
+    <div className="flex flex-col items-center w-full space-y-5">
       <div className="p-4 w-full max-w-screen-lg">
         <div className="space-y-4">
           <div className="border-2 p-3 relative">
@@ -206,7 +223,7 @@ const PlanTrip = () => {
               onChange={handleSearchChange}
               placeholder="Where do you want to go?"
             />
-
+            <div ref={suggestionsRef}>
             {suggestions.length > 0 && (
               <ul className="absolute z-10 bg-white border w-full mt-1 shadow-lg">
                 {suggestions.map((suggestion: any, index: number) => (
@@ -220,6 +237,7 @@ const PlanTrip = () => {
                 ))}
               </ul>
             )}
+            </div>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
