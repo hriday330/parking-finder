@@ -11,7 +11,7 @@ function App() {
         <Navbar>
           <Link to="/">Home</Link>
           <Link to="/plan-trip"> Plan your trip </Link>
-        </Navbar>
+        </Navbar>              
         <div className="flex my-10">
           <Routes>
             <Route path="/" element={<Home />} />
