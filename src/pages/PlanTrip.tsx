@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import mapboxgl from "mapbox-gl";
-import SearchBar from "@/components/custom/searchBar";
+import SearchBar from "@/components/custom/SearchBar";
 import TimePicker from "@/components/custom/TimePicker";
 import { haversineDistance } from "@/lib/distance";
+import { Button } from "@/components/ui/button";
 
 mapboxgl.accessToken =
   "pk.eyJ1IjoiaHJpZGF5MzMwIiwiYSI6ImNtNjJ5bDJxYjEyaWMybm9rYW5hbGtsam0ifQ.sjy7xcIkwP1i4vPum4M_1g";
@@ -25,12 +26,12 @@ const PlanTrip = () => {
       timer = setTimeout(() => func(...args), delay);
     };
   };
+
   const handleParkingLotClick = async (lot: any) => {
     const { coordinates } = lot;
-    const address = await getAddressFromCoordinates(coordinates[0], coordinates[1])
+    const address = await getAddressFromCoordinates(coordinates[0], coordinates[1]);
     setSelectedParkingLot({...lot, address: address});
   };
-  
 
   const fetchSuggestions = debounce(async (query: string) => {
     if (!query.trim()) {
@@ -58,13 +59,10 @@ const PlanTrip = () => {
       const response = await fetch(url);
       const data = await response.json();
   
-      // Check if there are features in the response
       if (data.features && data.features.length > 0) {
-        const address = data.features[0].place_name; // Place name is typically the address
-        console.log("Address:", address);
+        const address = data.features[0].place_name;
         return address;
       } else {
-        console.log("No address found for these coordinates.");
         return null;
       }
     } catch (error) {
@@ -73,9 +71,7 @@ const PlanTrip = () => {
     }
   };
 
-  console.log(selectedParkingLot)
   const fetchParkingLots = async (center: [number, number]) => {
-    // Clear existing markers
     parkingLotMarkers.forEach((marker) => marker.remove());
     setParkingLotMarkers([]);
 
@@ -113,7 +109,6 @@ const PlanTrip = () => {
           
             return marker;
           });
-          
 
         setParkingLotMarkers(newMarkers);
         setParkingLots(closestParkingLots); 
@@ -199,21 +194,21 @@ const PlanTrip = () => {
   }, []);
 
   return (
-    <div className="flex flex-col md:flex-row h-screen overflow-auto">
-      {/* Left side: Map */}
-      <div className="md:w-5/12 p-4">
+    <div className="flex flex-col items-center space-y-5">
+      <div className="p-4 w-full max-w-screen-lg">
         <div className="space-y-4">
           <div className="border-2 p-3 relative">
             <h2 className="text-2xl font-semibold">Destination</h2>
             <SearchBar
               value={searchItem}
+              className="w-8/12"
               onSearch={handleSearch}
               onChange={handleSearchChange}
               placeholder="Where do you want to go?"
             />
 
             {suggestions.length > 0 && (
-              <ul className="absolute z-10 bg-white border w-11/12 mt-1 shadow-lg">
+              <ul className="absolute z-10 bg-white border w-full mt-1 shadow-lg">
                 {suggestions.map((suggestion: any, index: number) => (
                   <li
                     key={index}
@@ -226,7 +221,8 @@ const PlanTrip = () => {
               </ul>
             )}
           </div>
-          <div className="text-black grid grid-cols-2 space-x-2">
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <TimePicker
               value={startTime}
               onChange={(e) => setStartTime(e.target.value)}
@@ -241,52 +237,60 @@ const PlanTrip = () => {
             />
           </div>
         </div>
+
         <div
           ref={mapContainerRef}
-          style={{ width: "100%", height: "calc(100vh - 500px)", marginTop: "20px" }}
+          className="w-screen h-[300px] lg:w-full lg:h-[500px] mt-5"
         />
       </div>
 
-      <div className="md:w-7/12 p-4 md:overflow-auto" style={{ maxHeight: 'calc(100vh - 100px)' }}>
-        <h2 className="text-xl font-semibold text-gray-800 mb-4">Closest Parking Lots</h2>
+      <div className="p-4 overflow-x-auto flex space-x-4 py-4 w-full max-w-screen-lg">
         {parkingLots.length > 0 ? (
-        <div className="space-x-2 grid grid-cols-2">
-            {parkingLots.map((lot, index) => (
+          parkingLots.map((lot, index) => (
             <div
-                key={index}
-                className="bg-white p-4 rounded-lg shadow-lg hover:shadow-2xl transition-shadow duration-300 border border-gray-200"
-                onClick={() => handleParkingLotClick(lot)} 
+              key={index}
+              className="bg-white p-4 rounded-lg shadow-lg hover:shadow-2xl transition-shadow duration-300 border border-gray-200 w-full sm:w-1/2 md:w-1/3 active:scale-95"
+              onClick={() => handleParkingLotClick(lot)}
             >
-                <h3 className="text-lg font-semibold text-gray-800">{lot.name} #{index + 1}</h3>
-                <p className="text-sm text-gray-600 mt-1">{lot.address}</p>
-                <p className="text-sm text-gray-500 mt-1">{lot.timeInEffect}</p>
-                <p className="text-sm text-gray-500 mt-1">DISTANCE: {lot.distance}</p>
+              <h3 className="text-lg font-semibold text-gray-800">{lot.name} #{index + 1}</h3>
+              <p className="text-sm text-gray-600 mt-1">{lot.address}</p>
+              <p className="text-sm text-gray-500 mt-1">{lot.timeInEffect}</p>
+              <p className="text-sm text-gray-500 mt-1">DISTANCE: {lot.distance}</p>
             </div>
-            ))}
-        </div>
+          ))
         ) : (
-        <p className="text-gray-500">No parking lots found.</p>
+          <p className="text-gray-500">No parking lots found.</p>
         )}
+      </div>
 
-        {selectedParkingLot && (
-        <div className="mt-4 p-4 bg-white rounded-lg shadow-lg border border-gray-200">
-            <h3 className="text-2xl font-semibold">{selectedParkingLot.name}</h3>
-            <p className="text-sm text-gray-500">Time In Effect: {selectedParkingLot.timeInEffect}</p>
-            <div className="mt-2">
-            <h4 className="text-lg font-semibold">Rates:</h4>
-            <ul className="list-disc pl-5">
+      {selectedParkingLot && (
+        <div
+            className={`p-6 bg-white rounded-lg shadow-lg border border-gray-200 w-full max-w-screen-lg transition-all duration-500 ease-in-out transform ${
+            selectedParkingLot ? "opacity-100 scale-100" : "opacity-0 scale-95"
+            }`}
+        >
+            <h3 className="text-3xl font-semibold text-gray-800">{selectedParkingLot.name}</h3>
+            <p className="text-lg font-semibold text-gray-500">Time In Effect: {selectedParkingLot.timeInEffect}</p>
+            <p className="mt-3 text-lg text-gray-500">Distance: {selectedParkingLot.distance}</p>
+            <span className="mt-3 text-lg font-semibold">Address: 
+            <label className="mt-2 text-lg text-gray-500"> {`${selectedParkingLot.address}`} </label>
+            </span>
+            <div className="mt-4">
+            <h4 className="text-2xl font-semibold text-gray-800">Rates:</h4>
+            <ul className="list-disc pl-6">
                 {selectedParkingLot.rates.map((rate: any, index: number) => (
-                <li key={index} className="text-sm text-gray-500">
-                    {rate.type}: ${rate.rate}
+                <li key={index} className="text-lg text-gray-500">
+                    {rate.type}: {rate.rate}
                 </li>
                 ))}
             </ul>
             </div>
-            <p className="mt-2 text-sm text-gray-500">Distance: {selectedParkingLot.distance}</p>
-            <span className="mt-2 font-semibold">Address: <label className="mt-2 text-sm text-gray-500"> {`${selectedParkingLot.address}`} </label></span>
+            <Button className="mt-4 px-6 py-3 text-2xl text-white bg-blue-500 hover:bg-blue-600 rounded-lg">
+            Let's go!
+            </Button>
         </div>
         )}
-      </div>
+
     </div>
   );
 };

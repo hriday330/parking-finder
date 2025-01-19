@@ -6,7 +6,7 @@ import PlanTrip from './pages/PlanTrip'
 
 function App() {
   return (
-    <main className="w-screen bg-white h-screen overflow-hidden">
+    <main className="w-screen bg-white h-screen">
       <Router>
         <Navbar>
           <Link to="/">Home</Link>
