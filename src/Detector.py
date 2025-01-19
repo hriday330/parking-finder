@@ -1,6 +1,8 @@
 import cv2
 import numpy as np
 import time
+import cvlib as cv
+from cvlib.object_detection import draw_bbox
 
 class Detector:
     def __init__(self, url, configPath, modelPath, classPath):
@@ -34,13 +36,16 @@ class Detector:
         (success, image) = cap.read()
 
         while success:
-            classLabelIDs, confidences, bboxes = self.net.detect(image, confThreshold = 0.5)
+            classLabelIDs, confidences, bboxes = self.net.detect(image, confThreshold = 0.1)
             bboxes = list(bboxes)
             confidences = list(np.array(confidences).reshape(1, -1)[0])
             confidences = list(map(float, confidences))
+            #bbox, label, conf = cv.detect_common_objects(image)
+
+            #output_image = draw_bbox(image, bbox, label, conf)
 
             # non-maxima suppression of bounding box (removes overlapping bounding boxes)
-            bboxIndex = cv2.dnn.NMSBoxes(bboxes, confidences, score_threshold = 0.5, nms_threshold = 0.2)
+            bboxIndex = cv2.dnn.NMSBoxes(bboxes, confidences, score_threshold = 0.1, nms_threshold = 0.5)
 
             if len(bboxIndex) != 0: # there are bounding boxes
                 for i in range(0, len(bboxIndex)):
