@@ -24,4 +24,5 @@ async def get_parking_availability(location : str):
         url = "http://128.189.228.47:8080/video"
     else:
         url = "sfu"
+        return -1
     return run_camera(url)
